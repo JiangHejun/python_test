@@ -3,7 +3,7 @@
 ***
 
 ## license
-* 机器码授权测试，`cd licenses`
+* 机器码授权测试，带超时验证，`cd licenses`
 * 获取/检验授权码
 ```
 python checkinfo.py
