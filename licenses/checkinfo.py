@@ -2,7 +2,7 @@
 Description:
 Author: Hejun Jiang
 Date: 2021-01-11 11:33:56
-LastEditTime: 2021-02-24 10:38:40
+LastEditTime: 2021-02-24 11:12:06
 LastEditors: Hejun Jiang
 Version: v0.0.1
 Contact: jianghejun@hccl.ioa.ac.cn
@@ -14,6 +14,7 @@ import gzip
 import uuid
 import time
 import base64
+from sys import exit
 from pyDes import des, CBC, PAD_PKCS5
 
 
