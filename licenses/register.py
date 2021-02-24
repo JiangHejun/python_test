@@ -2,15 +2,31 @@
 Description:
 Author: Hejun Jiang
 Date: 2021-01-11 10:55:33
-LastEditTime: 2021-01-11 15:55:24
+LastEditTime: 2021-02-24 10:32:16
 LastEditors: Hejun Jiang
 Version: v0.0.1
 Contact: jianghejun@hccl.ioa.ac.cn
 Corporation: hccl
 '''
+import io
 import os
+import gzip
 import base64
 from pyDes import des, CBC, PAD_PKCS5
+
+
+def gzip_compress(buf):
+    out = io.BytesIO()
+    with gzip.GzipFile(fileobj=out, mode="w") as f:
+        f.write(buf)
+    return out.getvalue()
+
+
+def gzip_decompress(buf):
+    obj = io.BytesIO(buf)
+    with gzip.GzipFile(fileobj=obj) as f:
+        result = f.read()
+    return result
 
 
 def register(day):
@@ -22,17 +38,15 @@ def register(day):
         print('{} is not exists'.format(machinefile))
         exit(-1)
     else:  # DES+base64加密
-        with open(machinefile, 'r', encoding='utf-8') as fin:
-            f = fin.read()
-            info = base64.b64decode(f.encode('utf-8')).decode('utf-8').split()  # mac, time
-
+        with open(machinefile, 'rb') as fin:  # gzip+base64
+            f = gzip_decompress(fin.read())
+            info = base64.b64decode(f).decode('utf-8').split()  # mac, time
             k = des(Des_key, CBC, Des_IV, pad=None, padmode=PAD_PKCS5)  # just for mac address
             info[0] = k.encrypt(info[0].encode('utf-8'))
-            info[1] = (info[1] + str(day)).encode('utf-8')
-
-            with open(licensefile, 'w', encoding='utf-8') as fout:
-                for line in info:
-                    fout.write(base64.b64encode(line).decode('utf-8')+'\n')
+            info[1] = (info[1] + str(day)).encode('utf-8')  # bytes
+            msg = base64.b64encode(info[0]).decode('utf-8') + ' ' + base64.b64encode(info[1]).decode('utf-8')  # base64
+            with open(licensefile, 'wb') as fout:
+                fout.write(gzip_compress(msg.encode('utf-8')))
                 print('{} is registed success'.format(licensefile))
 
 
